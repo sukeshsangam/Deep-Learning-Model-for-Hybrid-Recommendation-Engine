@@ -1,0 +1,1 @@
+A Hybrid recommendation engine built on deep learning architecture, which has the potential to combine content-based and collaborative filtering recommendation mechanisms using a deep learning supervisor (on going project) 
