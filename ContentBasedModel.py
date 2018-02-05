@@ -72,8 +72,8 @@ with open("DataWithPlot/final_cleaned_movies.json") as json_data:
 		model = gensim.models.Doc2Vec(size=300, window=10, min_count=5, workers=4, alpha=0.025, min_alpha=0.025)
 		model.build_vocab(iterator)
 
-		print("done building vocabulary")
-		print ("start training the model")
+		#print("done building vocabulary")
+		#print ("start training the model")
 
 		for epoch in range(10):
 			#print 'epcho %d..' % (epoch+1)
@@ -85,12 +85,12 @@ with open("DataWithPlot/final_cleaned_movies.json") as json_data:
 		doc_vectors=[]
 		y=[]
 		#print(liked)
-		for i in data_label:
-			doc_vectors.append(model.docvecs[i])
+		for l in data_label:
+			doc_vectors.append(model.docvecs[l])
 			#print(i)
 		#exit(0)
-		for i in liked:
-			y.append(i)
+		for j in liked:
+			y.append(j)
 		#print("length of y")
 		#print(len(y))
 		#model.save("doc2vec.model")
@@ -107,9 +107,9 @@ with open("DataWithPlot/final_cleaned_movies.json") as json_data:
 		#print(y_pred)
 		loo = LeaveOneOut()
 		loo.get_n_splits(doc_vectors)
-		user_dic={}
+		user_dic=[]
 		for train_index, test_index in loo.split(doc_vectors):
-			print("TRAIN:", train_index,"TEST:", test_index)
+			#print("TRAIN:", train_index,"TEST:", test_index)
 			rf=RandomForestClassifier()
 			temp_x=[]
 			temp_y=[]
@@ -126,46 +126,54 @@ with open("DataWithPlot/final_cleaned_movies.json") as json_data:
 			temp_y_test.append(temp_YY)
 			temp_x.pop(test_index[0])
 			temp_y.pop(test_index[0])
-			print("lenght of x")
-			print(len(temp_x))
-			print("lenght of y")
-			print(len(temp_y))
-			print("length of the movie id's")
-			print(len(temp_movie_id))
-			print("lenght of data labels")
-			print(len(data_label))
+			#print("lenght of x")
+			#print(len(temp_x))
+			#print("lenght of y")
+			#print(len(temp_y))
+			#print("length of the movie id's")
+			#print(len(temp_movie_id))
+			#print("lenght of data labels")
+			#print(len(data_label))
 			rf.fit(temp_x,temp_y)
 			
 			y_probability=rf.predict_proba(temp_x_test)
 			y_test_pre=rf.predict(temp_x_test)
-			print(file_name)
-			print(temp_y)
-			print(y_probability)
-			print(y_test_pre)
+			#print(file_name)
+			#print(temp_y)
+			#print(y_probability)
+			#print(y_test_pre)
 			
 			#print(temp_y_test)
 			#print(y)
-			print("-----------------------------------------")
+			#print("-----------------------------------------")
 			acc=accuracy_score(temp_y_test,y_test_pre)
 			#print("hello")
 			pres=precision_score(temp_y_test, y_test_pre)
 			#print("hello")
 			recall=recall_score(temp_y_test, y_test_pre)
-			print("-----------------------------------------")
+			#print("-----------------------------------------")
 			temp_dic={}
-			print(temp_movie_id)
-			print(test_index)
+			#print(temp_movie_id)
+			#print(test_index)
 			temp_dic["movie_id"]=temp_movie_id[test_index[0]]
 			temp_dic["acc"]=acc
 			temp_dic["pres"]=pres
 			temp_dic["recall"]=recall
+			temp_dic["actual_value"]=temp_y_test[0]
 			try:
 				temp_dic["Probability_like"]=y_probability[0][1]
 			except:
 				if file_name=="DataWithPlot/user20.json":
+					temp_dic["Probability_like"]=y_probability[0][0]
 					continue
-			print(temp_dic)
-		
+			user_dic.append(temp_dic)
+			#print(temp_dic)
+		file_name_save="OutputOfContentBasedModel/user_output"+str(i)+".json"
+		json_a = json.dumps(user_dic)
+		f = open(file_name_save,"w")
+		f.write(json_a)
+		f.close()
+			
 		#exit(0)
 		#print(cross_validation.LeaveOneOut(doc_vectors))
 		#exit(0)
